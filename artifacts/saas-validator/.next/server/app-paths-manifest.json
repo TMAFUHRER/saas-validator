@@ -1,3 +1,4 @@
 {
-  "/analyze/route": "app/analyze/route.js"
+  "/analyze/route": "app/analyze/route.js",
+  "/page": "app/page.js"
 }
