@@ -79,7 +79,7 @@ Provide your analysis as a single JSON object with this exact structure:
 Be specific, honest, and actionable. Name real competitors. Give real market size estimates. Avoid generic advice. Only return the JSON object — no markdown, no explanation, no preamble.`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: "POST",
@@ -94,9 +94,23 @@ Be specific, honest, and actionable. Name real competitors. Give real market siz
     });
 
     if (!response.ok) {
-      const errText = await response.text();
+      const errData = await response.json().catch(() => null);
+      const status = response.status;
+      if (status === 429) {
+        return NextResponse.json(
+          { error: "Gemini API quota exceeded. Your free tier limit has been reached. Please enable billing at aistudio.google.com or wait for the quota to reset." },
+          { status: 429 }
+        );
+      }
+      if (status === 404) {
+        return NextResponse.json(
+          { error: "Gemini model not found. Please check that your API key has access to Gemini models at aistudio.google.com." },
+          { status: 500 }
+        );
+      }
+      const message = errData?.error?.message ?? response.statusText;
       return NextResponse.json(
-        { error: `Gemini API error (${response.status}): ${errText}` },
+        { error: `Gemini API error (${status}): ${message}` },
         { status: 500 }
       );
     }
