@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY is not configured. Please add it to your environment secrets." },
+      { error: "GEMINI_API_KEY is not configured. Please add it to your environment secrets." },
       { status: 500 }
     );
   }
-
-  const client = new Anthropic({ apiKey });
 
   let body: { idea?: string };
   try {
@@ -82,20 +79,38 @@ Provide your analysis as a single JSON object with this exact structure:
 Be specific, honest, and actionable. Name real competitors. Give real market size estimates. Avoid generic advice. Only return the JSON object — no markdown, no explanation, no preamble.`;
 
   try {
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 2000,
-      messages: [{ role: "user", content: prompt }],
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2048,
+        },
+      }),
     });
 
-    const content = message.content[0];
-    if (content.type !== "text") {
-      return NextResponse.json({ error: "Unexpected response from AI" }, { status: 500 });
+    if (!response.ok) {
+      const errText = await response.text();
+      return NextResponse.json(
+        { error: `Gemini API error (${response.status}): ${errText}` },
+        { status: 500 }
+      );
     }
 
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      return NextResponse.json({ error: "Empty response from Gemini" }, { status: 500 });
+    }
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to parse AI response as JSON" }, { status: 500 });
     }
 
     const analysis = JSON.parse(jsonMatch[0]);
