@@ -1,0 +1,21 @@
+kind = "web"
+previewPath = "/"
+title = "SaaSValidator"
+version = "1.0.0"
+id = "artifacts/saas-validator"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21673
+
+[services.development]
+run = "pnpm --filter @workspace/saas-validator run dev"
+
+[services.env]
+PORT = "21673"

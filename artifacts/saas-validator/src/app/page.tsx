@@ -77,10 +77,7 @@ export default function LandingPage() {
             </div>
             <span className="font-semibold text-white">SaaSValidator</span>
           </div>
-          <Link
-            href="/app"
-            className="px-4 py-1.5 rounded-lg text-sm font-medium text-white btn-primary"
-          >
+          <Link href="/app" className="btn-primary px-4 py-1.5 rounded-lg text-sm font-medium text-white">
             Try it free
           </Link>
         </div>
@@ -104,18 +101,11 @@ export default function LandingPage() {
             competition, revenue potential, and risks — instantly.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href="/app"
-              className="btn-primary px-8 py-3.5 rounded-xl font-semibold text-white text-base"
-            >
+            <Link href="/app" className="btn-primary px-8 py-3.5 rounded-xl font-semibold text-white text-base">
               Analyze my idea →
             </Link>
-            <span className="text-sm" style={{ color: "#64748b" }}>
-              No sign-up required
-            </span>
+            <span className="text-sm" style={{ color: "#64748b" }}>No sign-up required</span>
           </div>
-
-          {/* Example pills */}
           <div className="mt-12 flex flex-wrap justify-center gap-2">
             <span className="text-sm mr-1" style={{ color: "#64748b" }}>Try:</span>
             {examples.map((ex) => (
@@ -136,16 +126,12 @@ export default function LandingPage() {
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Everything you need to validate faster
-            </h2>
-            <p style={{ color: "#64748b" }}>
-              A complete picture of your market opportunity in one report.
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Everything you need to validate faster</h2>
+            <p style={{ color: "#64748b" }}>A complete picture of your market opportunity in one report.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((f) => (
-              <div key={f.title} className="card-glass p-6 rounded-2xl group hover:border-indigo-500/30 transition-colors">
+              <div key={f.title} className="card-glass p-6 rounded-2xl hover:border-indigo-500/30 transition-colors">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: "rgba(99,102,241,0.15)", color: "#818cf8" }}>
                   {f.icon}
                 </div>
@@ -161,16 +147,11 @@ export default function LandingPage() {
       <section className="py-20 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <div className="card-glass rounded-3xl p-10">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Ready to validate your idea?
-            </h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Ready to validate your idea?</h2>
             <p className="mb-8" style={{ color: "#64748b" }}>
               Stop guessing. Get a data-driven analysis of your SaaS concept before writing a single line of code.
             </p>
-            <Link
-              href="/app"
-              className="btn-primary inline-block px-8 py-3.5 rounded-xl font-semibold text-white"
-            >
+            <Link href="/app" className="btn-primary inline-block px-8 py-3.5 rounded-xl font-semibold text-white">
               Start validating →
             </Link>
           </div>
