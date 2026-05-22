@@ -227,7 +227,7 @@ export default function AppPage() {
                 <input
                   value={niche}
                   onChange={(e) => setNiche(e.target.value)}
-                  placeholder="ex. Freelance, E-commerce, RH, Immobilier, Marketing…"
+                  placeholder="Ex: Productivité, Email marketing, CRM, Facturation, Santé…"
                   required
                   disabled={loading}
                   className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border transition-colors"
