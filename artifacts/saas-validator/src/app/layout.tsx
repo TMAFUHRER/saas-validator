@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Providers from "@/components/Providers";
 import Nav from "@/components/Nav";
 import "./globals.css";
 
@@ -12,8 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body>
-        <Nav />
-        <div className="pt-14">{children}</div>
+        <Providers>
+          <Nav />
+          <div className="pt-14">{children}</div>
+        </Providers>
       </body>
     </html>
   );

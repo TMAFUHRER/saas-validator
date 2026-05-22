@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { saveAnalysis } from "@/lib/history";
 import { getBadge, BADGE_STYLES, type AnalysisResult } from "@/lib/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function ScoreRing({
   score,
@@ -24,10 +25,7 @@ function ScoreRing({
   return (
     <div className="flex flex-col items-center gap-3">
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={10}
-        />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={10} />
         <circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none" stroke={color} strokeWidth={10}
@@ -36,26 +34,19 @@ function ScoreRing({
           style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)" }}
         />
         <text
-          x={size / 2} y={size / 2 - 6}
-          textAnchor="middle"
+          x={size / 2} y={size / 2 - 6} textAnchor="middle"
           style={{
-            fill: color,
-            fontSize: size * 0.24,
-            fontWeight: 800,
-            transform: `rotate(90deg)`,
-            transformOrigin: `${size / 2}px ${size / 2}px`,
+            fill: color, fontSize: size * 0.24, fontWeight: 800,
+            transform: `rotate(90deg)`, transformOrigin: `${size / 2}px ${size / 2}px`,
           }}
         >
           {score}
         </text>
         <text
-          x={size / 2} y={size / 2 + size * 0.14}
-          textAnchor="middle"
+          x={size / 2} y={size / 2 + size * 0.14} textAnchor="middle"
           style={{
-            fill: "rgba(255,255,255,0.35)",
-            fontSize: size * 0.11,
-            transform: `rotate(90deg)`,
-            transformOrigin: `${size / 2}px ${size / 2}px`,
+            fill: "rgba(255,255,255,0.35)", fontSize: size * 0.11,
+            transform: `rotate(90deg)`, transformOrigin: `${size / 2}px ${size / 2}px`,
           }}
         >
           /100
@@ -82,14 +73,8 @@ function Section({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div
-      className="rounded-2xl border overflow-hidden"
-      style={{ backgroundColor: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)" }}
-    >
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left"
-      >
+    <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)" }}>
+      <button onClick={() => setOpen((o) => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left">
         <div className="flex items-center gap-3">
           <span style={{ color: "#6366f1" }}>{icon}</span>
           <span className="font-semibold text-sm text-white">{title}</span>
@@ -108,6 +93,7 @@ function Section({
 }
 
 export default function AppPage() {
+  const { t, lang } = useLanguage();
   const [saasName, setSaasName] = useState("");
   const [description, setDescription] = useState("");
   const [niche, setNiche] = useState("");
@@ -139,11 +125,11 @@ export default function AppPage() {
     setSaved(false);
 
     try {
-      const idea = `Nom du SaaS: ${saasName}\nDescription: ${description}\nNiche / Catégorie: ${niche}`;
+      const idea = `${t("form.name.label")}: ${saasName}\n${t("form.desc.label")}: ${description}\n${t("form.niche.label")}: ${niche}`;
       const res = await fetch("/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea }),
+        body: JSON.stringify({ idea, language: lang }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erreur lors de l'analyse");
@@ -167,75 +153,57 @@ export default function AppPage() {
   return (
     <div className="min-h-screen px-6 py-10" style={{ backgroundColor: "#070814" }}>
       <div className="max-w-2xl mx-auto">
-
         {!result && (
           <>
             <div className="mb-8">
-              <h1 className="text-2xl font-extrabold text-white mb-1">Analyser mon marché</h1>
-              <p className="text-sm" style={{ color: "#475569" }}>
-                Décris ton idée en 3 champs — l&apos;IA fait le reste en 30 secondes.
-              </p>
+              <h1 className="text-2xl font-extrabold text-white mb-1">{t("form.title")}</h1>
+              <p className="text-sm" style={{ color: "#475569" }}>{t("form.subtitle")}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* SaaS Name */}
               <div>
                 <label className="block text-xs font-semibold mb-1.5" style={{ color: "#64748b" }}>
-                  Nom du SaaS <span style={{ color: "#ef4444" }}>*</span>
+                  {t("form.name.label")} <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input
                   value={saasName}
                   onChange={(e) => setSaasName(e.target.value)}
-                  placeholder="ex. InvoiceFlow, TeamSync, ReviewBot…"
+                  placeholder={t("form.name.placeholder")}
                   required
                   disabled={loading}
                   className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border transition-colors"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.03)",
-                    borderColor: "rgba(255,255,255,0.08)",
-                    caretColor: "#818cf8",
-                  }}
+                  style={{ backgroundColor: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)", caretColor: "#818cf8" }}
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-xs font-semibold mb-1.5" style={{ color: "#64748b" }}>
-                  Description <span style={{ color: "#ef4444" }}>*</span>
+                  {t("form.desc.label")} <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="ex. Un outil SaaS qui automatise la facturation pour les freelances et génère des relances de paiement automatiques."
+                  placeholder={t("form.desc.placeholder")}
                   required
                   rows={4}
                   disabled={loading}
                   className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border resize-none transition-colors"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.03)",
-                    borderColor: "rgba(255,255,255,0.08)",
-                    caretColor: "#818cf8",
-                  }}
+                  style={{ backgroundColor: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)", caretColor: "#818cf8" }}
                 />
               </div>
 
-              {/* Niche */}
               <div>
                 <label className="block text-xs font-semibold mb-1.5" style={{ color: "#64748b" }}>
-                  Niche / Catégorie <span style={{ color: "#ef4444" }}>*</span>
+                  {t("form.niche.label")} <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input
                   value={niche}
                   onChange={(e) => setNiche(e.target.value)}
-                  placeholder="Ex: Productivité, Email marketing, CRM, Facturation, Santé…"
+                  placeholder={t("form.niche.placeholder")}
                   required
                   disabled={loading}
                   className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none border transition-colors"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.03)",
-                    borderColor: "rgba(255,255,255,0.08)",
-                    caretColor: "#818cf8",
-                  }}
+                  style={{ backgroundColor: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)", caretColor: "#818cf8" }}
                 />
               </div>
 
@@ -260,20 +228,16 @@ export default function AppPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    Analyse en cours…
+                    {t("form.loading")}
                   </span>
-                ) : (
-                  "Analyser mon marché →"
-                )}
+                ) : t("form.submit")}
               </button>
             </form>
           </>
         )}
 
-        {/* Results */}
         {result && (
           <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-extrabold text-white">{saasName}</h1>
@@ -289,52 +253,43 @@ export default function AppPage() {
                   className="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold border"
                   style={{ color: badgeStyle.color, backgroundColor: badgeStyle.bg, borderColor: badgeStyle.border }}
                 >
-                  {badgeStyle.label}
+                  {badge}
                 </span>
               )}
             </div>
 
-            {/* Score rings */}
             <div
               className="rounded-2xl border p-6 flex flex-col sm:flex-row items-center justify-around gap-8"
               style={{ backgroundColor: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)" }}
             >
               <ScoreRing
                 score={result.willingness_to_pay}
-                label="Des gens paient"
-                sublabel="Intention d'achat détectée"
+                label={t("results.ring1")}
+                sublabel={t("results.ring1sub")}
                 color="#22c55e"
               />
               <div className="hidden sm:block w-px h-20" style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
               <ScoreRing
                 score={result.market_saturation}
-                label="Saturation du marché"
-                sublabel="Plus c'est bas, mieux c'est"
+                label={t("results.ring2")}
+                sublabel={t("results.ring2sub")}
                 color="#f97316"
               />
             </div>
 
-            {/* Quick stats */}
             <div className="grid grid-cols-2 gap-3">
-              <div
-                className="rounded-xl border px-4 py-3"
-                style={{ backgroundColor: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)" }}
-              >
-                <p className="text-xs mb-1" style={{ color: "#475569" }}>Annonces détectées</p>
+              <div className="rounded-xl border px-4 py-3" style={{ backgroundColor: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)" }}>
+                <p className="text-xs mb-1" style={{ color: "#475569" }}>{t("results.ads")}</p>
                 <p className="text-xl font-bold text-white">{result.ads_detected}</p>
               </div>
-              <div
-                className="rounded-xl border px-4 py-3"
-                style={{ backgroundColor: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)" }}
-              >
-                <p className="text-xs mb-1" style={{ color: "#475569" }}>Fourchette de prix</p>
+              <div className="rounded-xl border px-4 py-3" style={{ backgroundColor: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)" }}>
+                <p className="text-xs mb-1" style={{ color: "#475569" }}>{t("results.price")}</p>
                 <p className="text-xl font-bold text-white">{result.price_range}</p>
               </div>
             </div>
 
-            {/* Collapsible sections */}
             <Section
-              title={`Concurrents détectés (${result.competitors.length})`}
+              title={`${t("results.competitors")} (${result.competitors.length})`}
               defaultOpen
               icon={
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -344,11 +299,8 @@ export default function AppPage() {
             >
               <div className="flex flex-wrap gap-2">
                 {result.competitors.map((c) => (
-                  <span
-                    key={c}
-                    className="px-2.5 py-1 rounded-lg text-xs font-medium border"
-                    style={{ backgroundColor: "rgba(99,102,241,0.1)", borderColor: "rgba(99,102,241,0.2)", color: "#a5b4fc" }}
-                  >
+                  <span key={c} className="px-2.5 py-1 rounded-lg text-xs font-medium border"
+                    style={{ backgroundColor: "rgba(99,102,241,0.1)", borderColor: "rgba(99,102,241,0.2)", color: "#a5b4fc" }}>
                     {c}
                   </span>
                 ))}
@@ -356,7 +308,7 @@ export default function AppPage() {
             </Section>
 
             <Section
-              title="Preuves que des gens paient"
+              title={t("results.proof")}
               defaultOpen
               icon={
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -377,7 +329,7 @@ export default function AppPage() {
             </Section>
 
             <Section
-              title="Insights Reddit & forums"
+              title={t("results.reddit")}
               icon={
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -387,7 +339,8 @@ export default function AppPage() {
               <ul className="space-y-2.5">
                 {result.reddit_insights.map((ins, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm" style={{ color: "#94a3b8" }}>
-                    <span className="mt-0.5 flex-shrink-0 text-xs font-bold w-4 h-4 rounded flex items-center justify-center" style={{ backgroundColor: "rgba(249,115,22,0.15)", color: "#f97316" }}>
+                    <span className="mt-0.5 flex-shrink-0 text-xs font-bold w-4 h-4 rounded flex items-center justify-center"
+                      style={{ backgroundColor: "rgba(249,115,22,0.15)", color: "#f97316" }}>
                       {i + 1}
                     </span>
                     {ins}
@@ -397,7 +350,7 @@ export default function AppPage() {
             </Section>
 
             <Section
-              title={`Sources analysées (${result.sources_analyzed})`}
+              title={`${t("results.sources")} (${result.sources_analyzed})`}
               icon={
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -405,22 +358,15 @@ export default function AppPage() {
               }
             >
               <p className="text-sm" style={{ color: "#64748b" }}>
-                L&apos;IA a analysé <strong className="text-white">{result.sources_analyzed} sources</strong> — forums, marketplaces d&apos;apps, plateformes publicitaires, discussions en ligne — pour produire cette analyse.
+                {t("results.sourcesText", { n: result.sources_analyzed })}
               </p>
             </Section>
 
-            {/* Actions */}
             <div className="flex items-center justify-between pt-2">
-              <button
-                onClick={handleReset}
-                className="text-sm font-medium transition-colors"
-                style={{ color: "#6366f1" }}
-              >
-                ← Nouvelle analyse
+              <button onClick={handleReset} className="text-sm font-medium" style={{ color: "#6366f1" }}>
+                {t("results.newAnalysis")}
               </button>
-              <span className="text-xs" style={{ color: "#1e293b" }}>
-                ✓ Sauvegardé dans l&apos;historique
-              </span>
+              <span className="text-xs" style={{ color: "#1e293b" }}>{t("results.saved")}</span>
             </div>
           </div>
         )}
