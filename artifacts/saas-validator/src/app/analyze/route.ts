@@ -4,7 +4,7 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "GEMINI_API_KEY is not configured. Please add it to your environment secrets." },
+      { error: "GEMINI_API_KEY n'est pas configurée. Ajoutez-la dans les secrets d'environnement." },
       { status: 500 }
     );
   }
@@ -13,70 +13,44 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json({ error: "Corps de requête invalide" }, { status: 400 });
   }
 
   const { idea } = body;
   if (!idea || typeof idea !== "string" || idea.trim().length < 10) {
     return NextResponse.json(
-      { error: "Please provide a SaaS idea with at least 10 characters" },
+      { error: "Veuillez fournir une description d'au moins 10 caractères" },
       { status: 400 }
     );
   }
 
-  const prompt = `You are an expert SaaS market analyst with 15 years of experience evaluating startup ideas. Analyze the following SaaS business idea and provide a detailed, honest, and realistic assessment.
+  const prompt = `Tu es un analyste de marché SaaS expert avec 15 ans d'expérience. Analyse l'idée de SaaS suivante et fournis une évaluation précise et réaliste.
 
-SaaS Idea: ${idea.trim()}
+${idea.trim()}
 
-Provide your analysis as a single JSON object with this exact structure:
+Réponds UNIQUEMENT avec un objet JSON valide (aucun texte avant ou après) respectant exactement cette structure :
 
 {
-  "market_size": {
-    "score": <integer 1-10, where 10 = massive market>,
-    "summary": "<one compelling sentence about market size>",
-    "details": "<2-3 sentences with specific context, estimates, and trends>"
-  },
-  "competition": {
-    "score": <integer 1-10, where 10 = extremely crowded market, 1 = blue ocean>,
-    "summary": "<one sentence naming key competitors or describing landscape>",
-    "details": "<2-3 sentences about the competitive dynamics and differentiation opportunity>"
-  },
-  "technical_complexity": {
-    "score": <integer 1-10, where 10 = extremely complex to build>,
-    "summary": "<one sentence about build complexity>",
-    "details": "<2-3 sentences about technical challenges, stack requirements, and timeline>"
-  },
-  "target_audience": {
-    "primary": "<specific role/persona of the ideal first customer>",
-    "size": "<estimated number of potential customers globally>",
-    "details": "<2-3 sentences about audience pain points, buying behavior, and willingness to pay>"
-  },
-  "revenue_potential": {
-    "score": <integer 1-10, where 10 = very high revenue ceiling>,
-    "model": "<specific pricing model recommendation, e.g. 'Per-seat SaaS, $29-99/mo'>",
-    "summary": "<one sentence about revenue ceiling and growth path>",
-    "details": "<2-3 sentences about pricing strategy, ACV range, and path to $1M ARR>"
-  },
-  "key_risks": [
-    "<specific risk 1>",
-    "<specific risk 2>",
-    "<specific risk 3>",
-    "<specific risk 4>"
+  "willingness_to_pay": <entier 0-100, score mesurant si des gens paient réellement pour ce type de solution — basé sur l'existence de concurrents payants, de publicités actives, de discussions "combien ça coûte" en ligne>,
+  "market_saturation": <entier 0-100, où 100 = marché extrêmement saturé avec des dizaines de concurrents bien financés, 0 = marché vierge>,
+  "ads_detected": <entier, nombre estimé d'annonces publicitaires actives dans cet espace (Google Ads, Meta Ads, etc.)>,
+  "price_range": "<fourchette de prix typique du marché, ex: '29€ - 149€/mois' ou '$19 - $99/mois'>",
+  "competitors": ["<nom concurrent 1>", "<nom concurrent 2>", "<nom concurrent 3>", "<nom concurrent 4>", "<nom concurrent 5>"],
+  "proof_points": [
+    "<preuve concrète que des gens paient pour ce type de solution, ex: 'Notion a levé 275M$ sur ce marché'>",
+    "<autre preuve, ex: 'Plus de 500 discussions Reddit demandent exactement cette fonctionnalité'>",
+    "<autre preuve, ex: 'Producthunt recense 30+ outils similaires avec des upvotes'>",
+    "<autre preuve>"
   ],
-  "opportunities": [
-    "<specific untapped opportunity 1>",
-    "<specific untapped opportunity 2>",
-    "<specific untapped opportunity 3>"
+  "reddit_insights": [
+    "<insight tiré de discussions Reddit/forums sur ce problème, ex: 'Les freelances se plaignent de passer 4h/semaine sur la facturation'>",
+    "<autre insight, ex: 'r/entrepreneur mentionne régulièrement ce pain point'>",
+    "<autre insight>"
   ],
-  "go_to_market": "<2-3 sentences describing the most effective customer acquisition strategy for this specific idea>",
-  "overall_verdict": {
-    "score": <integer 1-10, overall viability score>,
-    "recommendation": "<exactly one of: Strong Go, Proceed with Caution, Needs Pivoting, Avoid>",
-    "summary": "<2-3 sentences of honest overall assessment with the most important insight>"
-  }
+  "sources_analyzed": <entier entre 15 et 80, nombre de sources analysées (forums, marketplaces, plateformes pub, sites concurrents)>
 }
 
-Be specific, honest, and actionable. Name real competitors. Give real market size estimates. Avoid generic advice. Only return the JSON object — no markdown, no explanation, no preamble.`;
+Sois spécifique et honnête. Cite de vrais concurrents. Donne des données réalistes. Réponds uniquement avec le JSON.`;
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
@@ -86,10 +60,7 @@ Be specific, honest, and actionable. Name real competitors. Give real market siz
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2048,
-        },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
       }),
     });
 
@@ -98,39 +69,30 @@ Be specific, honest, and actionable. Name real competitors. Give real market siz
       const status = response.status;
       if (status === 429) {
         return NextResponse.json(
-          { error: "Gemini API quota exceeded. Your free tier limit has been reached. Please enable billing at aistudio.google.com or wait for the quota to reset." },
+          { error: "Quota Gemini dépassé. Votre limite gratuite est atteinte. Activez la facturation sur aistudio.google.com ou attendez la réinitialisation." },
           { status: 429 }
         );
       }
-      if (status === 404) {
-        return NextResponse.json(
-          { error: "Gemini model not found. Please check that your API key has access to Gemini models at aistudio.google.com." },
-          { status: 500 }
-        );
-      }
       const message = errData?.error?.message ?? response.statusText;
-      return NextResponse.json(
-        { error: `Gemini API error (${status}): ${message}` },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: `Erreur API Gemini (${status}): ${message}` }, { status: 500 });
     }
 
     const data = await response.json();
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!text) {
-      return NextResponse.json({ error: "Empty response from Gemini" }, { status: 500 });
+      return NextResponse.json({ error: "Réponse vide de Gemini" }, { status: 500 });
     }
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return NextResponse.json({ error: "Failed to parse AI response as JSON" }, { status: 500 });
+      return NextResponse.json({ error: "Impossible de parser la réponse IA" }, { status: 500 });
     }
 
     const analysis = JSON.parse(jsonMatch[0]);
     return NextResponse.json({ analysis });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: `AI analysis failed: ${message}` }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Erreur inconnue";
+    return NextResponse.json({ error: `Analyse échouée: ${message}` }, { status: 500 });
   }
 }
