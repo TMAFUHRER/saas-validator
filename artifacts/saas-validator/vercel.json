@@ -1,6 +1,1 @@
-{
-  "framework": "nextjs",
-  "installCommand": "npm install --legacy-peer-deps",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next"
-}
+{"framework":"nextjs","installCommand":"pnpm install","buildCommand":"pnpm run build","outputDirectory":".next"}
