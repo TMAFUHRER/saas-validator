@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/saas-validator",
+  "name": "saas-validator",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -15,10 +15,10 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "tailwindcss": "catalog:",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.14",
     "typescript": "~5.9.3"
   }
 }

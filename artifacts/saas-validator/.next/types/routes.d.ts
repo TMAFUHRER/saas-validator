@@ -3,7 +3,7 @@
 
 type AppRoutes = "/" | "/app" | "/historique"
 type AppRouteHandlerRoutes = "/analyze"
-type PageRoutes = "/not-found"
+type PageRoutes = never
 type LayoutRoutes = "/"
 type RedirectRoutes = never
 type RewriteRoutes = never
@@ -15,7 +15,6 @@ interface ParamMap {
   "/analyze": {}
   "/app": {}
   "/historique": {}
-  "/not-found": {}
 }
 
 
