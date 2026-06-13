@@ -1,5 +1,16 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+      process.env.CLERK_PUBLISHABLE_KEY ||
+      "",
+    NEXT_PUBLIC_CLERK_SIGN_IN_URL: "/sign-in",
+    NEXT_PUBLIC_CLERK_SIGN_UP_URL: "/sign-up",
+    NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: "/app",
+    NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: "/app",
+  },
+};
 
 export default nextConfig;

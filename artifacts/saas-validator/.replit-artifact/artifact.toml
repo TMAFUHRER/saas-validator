@@ -15,7 +15,7 @@ paths = [ "/" ]
 localPort = 21673
 
 [services.development]
-run = "pnpm --filter @workspace/saas-validator run dev"
+run = "pnpm --filter saas-validator run dev"
 
 [services.env]
 PORT = "21673"
