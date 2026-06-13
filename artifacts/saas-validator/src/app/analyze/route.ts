@@ -31,7 +31,7 @@ ${idea.trim()}
 
 ${languageNote}
 
-Réponds UNIQUEMENT avec un objet JSON valide (aucun texte avant ou après) respectant exactement cette structure :
+Respond ONLY with a valid JSON object (no text before or after) matching exactly this structure:
 
 {
   "willingness_to_pay": <integer 0-100, score measuring whether people actually pay for this type of solution — based on the existence of paying competitors, active ads, and online "how much does it cost" discussions>,
@@ -57,10 +57,10 @@ Be specific and honest. Cite real competitors. Give realistic data. Respond ONLY
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "GEMINI_API_KEY is not configured." },
+      { error: "ANTHROPIC_API_KEY is not configured." },
       { status: 500 }
     );
   }
@@ -82,14 +82,17 @@ export async function POST(req: NextRequest) {
   const prompt = buildPrompt(idea, lang);
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+        model: "claude-haiku-4-5",
+        max_tokens: 2048,
+        messages: [{ role: "user", content: prompt }],
       }),
     });
 
@@ -97,19 +100,19 @@ export async function POST(req: NextRequest) {
       const errData = await response.json().catch(() => null);
       if (response.status === 429) {
         return NextResponse.json(
-          { error: "Gemini quota exceeded. Your free tier limit has been reached. Enable billing at aistudio.google.com or wait for the quota to reset." },
+          { error: "Anthropic rate limit reached. Please wait a moment and try again." },
           { status: 429 }
         );
       }
       const message = errData?.error?.message ?? response.statusText;
-      return NextResponse.json({ error: `Gemini API error (${response.status}): ${message}` }, { status: 500 });
+      return NextResponse.json({ error: `Anthropic API error (${response.status}): ${message}` }, { status: 500 });
     }
 
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = data?.content?.[0]?.text;
 
     if (!text) {
-      return NextResponse.json({ error: "Empty response from Gemini" }, { status: 500 });
+      return NextResponse.json({ error: "Empty response from Claude" }, { status: 500 });
     }
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
