@@ -1,0 +1,12 @@
+"Rebuild the results page to match this EXACT structure:
+1. Title 'Résultats : [SaaS Name]' with niche tag below, and a 'Nouvelle analyse' button top right
+2. Verdict banner (green bg for GO, orange for Prudence, red for Stop) with a checkmark icon, colored dot, and label like 'GO — Fonce !'. Below the banner, add a paragraph (3-5 sentences) explaining WHY this verdict was given — mentioning the payment score, saturation score, market context, what competitors don't cover yet, and a concrete recommendation with suggested pricing.
+3. Score circle 'Des gens paient ?' (green) with subtitle 'Intention d'achat détectée' and a paragraph below explaining the payment evidence in 1-2 sentences.
+4. Score circle 'Saturation du marché' (orange) with subtitle 'Plus c'est bas, mieux c'est' and explanation paragraph.
+5. Two stat cards side by side: 'Publicités actives détectées' (number) and 'Fourchette de prix' (range like '29$ - 149$/mois')
+6. 'CONCURRENTS PAYANTS' section showing competitor name pills
+7. 'PREUVES' section — bullet list with green checkmarks, each proof being one sentence citing a specific concrete fact (e.g. 'X concurrents diffusent des publicités Meta actives ciblant...', 'Sur r/SaaS, des utilisateurs demandent...', 'Produit similaire a reçu X upvotes sur Product Hunt...', 'Avis G2 indiquent que les utilisateurs paient X-Y$/mois...', 'Google Trends montre une croissance de X% sur 12 mois...')
+8. Collapsible 'Concurrents principaux (N)' section — each competitor shown as a card with name, estimated ARR range (e.g. '500k-1M$ ARR') in green text top right, and a one-sentence description
+9. Collapsible 'Insights Reddit (N)' section
+10. Collapsible 'Sources analysées (N)' section — each source shown with source name (META ADS, REDDIT, PRODUCT HUNT, G2, GOOGLE TRENDS) in colored caps, a colored dot badge (green=positive, red=negative, gray=mixed), and a one-sentence summary of that specific finding
+Update the AI prompt/schema to generate all this additional data: verdict explanation paragraph, competitor ARR estimates, and source-by-source sentiment analysis with one-sentence findings for each source checked."
