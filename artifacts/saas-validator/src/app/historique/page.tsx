@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getHistory, deleteAnalysis } from "@/lib/history";
 import { getBadge, BADGE_STYLES, type AnalysisRecord } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ResultsView from "@/components/ResultsView";
 
 function MiniRing({ score, color }: { score: number; color: string }) {
   const r = 16;
@@ -32,21 +33,42 @@ export default function HistoriquePage() {
   const { t } = useLanguage();
   const [records, setRecords] = useState<AnalysisRecord[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [selected, setSelected] = useState<AnalysisRecord | null>(null);
 
   useEffect(() => {
     setMounted(true);
     setRecords(getHistory());
   }, []);
 
-  function handleDelete(id: string) {
+  function handleDelete(e: React.MouseEvent, id: string) {
+    e.stopPropagation();
     deleteAnalysis(id);
     setRecords((prev) => prev.filter((r) => r.id !== id));
+    if (selected?.id === id) setSelected(null);
   }
 
   if (!mounted) return null;
 
+  /* ── Detail view ── */
+  if (selected) {
+    return (
+      <div className="min-h-screen px-4 sm:px-6 py-10" style={{ backgroundColor: "#070814" }}>
+        <div className="max-w-2xl mx-auto">
+          <ResultsView
+            result={selected.result}
+            saasName={selected.saasName}
+            niche={selected.niche}
+            onBack={() => setSelected(null)}
+            backLabel={t("history.backToList")}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  /* ── List view ── */
   return (
-    <div className="min-h-screen px-6 py-10" style={{ backgroundColor: "#070814" }}>
+    <div className="min-h-screen px-4 sm:px-6 py-10" style={{ backgroundColor: "#070814" }}>
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -86,14 +108,29 @@ export default function HistoriquePage() {
               const badge = getBadge(record.result.willingness_to_pay, record.result.market_saturation);
               const badgeStyle = BADGE_STYLES[badge];
               const date = new Date(record.date);
-              const dateStr = date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+              const dateStr = date.toLocaleDateString(undefined, {
+                day: "numeric", month: "short", year: "numeric",
+              });
 
               return (
                 <div
                   key={record.id}
-                  className="rounded-2xl border p-5 flex items-center gap-4 group"
-                  style={{ backgroundColor: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)" }}
+                  onClick={() => setSelected(record)}
+                  className="rounded-2xl border p-5 flex items-center gap-4 group cursor-pointer transition-colors"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.02)",
+                    borderColor: "rgba(255,255,255,0.07)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.backgroundColor = "rgba(99,102,241,0.06)";
+                    (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(99,102,241,0.2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.backgroundColor = "rgba(255,255,255,0.02)";
+                    (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.07)";
+                  }}
                 >
+                  {/* Mini rings */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <div className="flex flex-col items-center gap-0.5">
                       <MiniRing score={record.result.willingness_to_pay} color="#22c55e" />
@@ -105,6 +142,7 @@ export default function HistoriquePage() {
                     </div>
                   </div>
 
+                  {/* Main info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <p className="font-semibold text-white text-sm truncate">{record.saasName}</p>
@@ -119,6 +157,7 @@ export default function HistoriquePage() {
                     <p className="text-xs" style={{ color: "#334155" }}>{dateStr}</p>
                   </div>
 
+                  {/* Badge + actions */}
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
                     <span
                       className="px-3 py-1 rounded-full text-xs font-bold border"
@@ -126,13 +165,22 @@ export default function HistoriquePage() {
                     >
                       {badge}
                     </span>
-                    <button
-                      onClick={() => handleDelete(record.id)}
-                      className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ color: "#334155" }}
-                    >
-                      {t("history.delete")}
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+                        style={{ color: "#6366f1" }}>
+                        {t("history.view")}
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                      <button
+                        onClick={(e) => handleDelete(e, record.id)}
+                        className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ color: "#334155" }}
+                      >
+                        {t("history.delete")}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
